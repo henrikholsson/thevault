@@ -1,0 +1,12 @@
+[package]
+name = "key-vault"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+aes-gcm = "0.10"      # AES-GCM encryption
+rand = "0.8"          # For generating encryption keys
+flate2 = "1.1"        # Compression (Gzip)
+pbkdf2 = "0.12"
+sha2 = "0.10"
+hmac = "0.12"
