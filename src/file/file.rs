@@ -1,6 +1,6 @@
 use std::collections::HashMap;
-use std::fs::{OpenOptions};
-use std::io::{Write};
+use std::fs::{self, OpenOptions};
+use std::io::{self, Write};
 use crate::encryption::{decrypt_with_password, encrypt_with_password};
 use crate::compression::compression::{compress, decompress};
 
