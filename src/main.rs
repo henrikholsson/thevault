@@ -17,6 +17,7 @@ mod encryption;
 mod compression;
 use crate::file::file::{KvEntry, KvStore};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::path::PathBuf;
 
 fn prompt_password(prompt: &str) -> String {
     print!("{}", prompt);
@@ -875,17 +876,35 @@ fn print_help() {
     println!("Clipboard: clears copied values after {} seconds.", CLIPBOARD_CLEAR_SECONDS);
 }
 
+fn resolve_data_paths() -> (PathBuf, PathBuf) {
+    let exe_path = std::env::current_exe().unwrap_or_else(|err| {
+        eprintln!("Failed to locate executable path: {}", err);
+        std::process::exit(1);
+    });
+    let base_dir = exe_path.parent().unwrap_or_else(|| {
+        eprintln!("Failed to resolve executable directory.");
+        std::process::exit(1);
+    });
+    (
+        base_dir.join("kvstore.log"),
+        base_dir.join("kvstore.pw"),
+    )
+}
+
 fn main() {
-    const LOG_PATH: &str = "kvstore.log";
-    const PASSWORD_PATH: &str = "kvstore.pw";
-    let (password, load_existing) = init_password(PASSWORD_PATH, LOG_PATH).unwrap_or_else(|err| {
+    let (log_path, password_path) = resolve_data_paths();
+    let (password, load_existing) = init_password(
+        password_path.to_str().unwrap_or("kvstore.pw"),
+        log_path.to_str().unwrap_or("kvstore.log"),
+    )
+    .unwrap_or_else(|err| {
         eprintln!("Failed to initialize password: {}", err);
         std::process::exit(1);
     });
     let mut db = if load_existing {
-        KvStore::new(LOG_PATH, &password)
+        KvStore::new(&log_path.to_string_lossy(), &password)
     } else {
-        KvStore::new_empty(LOG_PATH, &password)
+        KvStore::new_empty(&log_path.to_string_lossy(), &password)
     };
     println!("Welcome to the Rock");
     loop {
